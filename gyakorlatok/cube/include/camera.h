@@ -14,6 +14,11 @@ typedef struct Camera
 } Camera;
 
 /**
+ * Is the texture preview visible?
+ */
+int is_preview_visible;
+
+/**
  * Initialize the camera to the start position.
  */
 void init_camera(Camera* camera);
@@ -44,4 +49,3 @@ void set_camera_speed(Camera* camera, double speed);
 void set_camera_side_speed(Camera* camera, double speed);
 
 #endif /* CAMERA_H */
-

@@ -3,16 +3,25 @@
 #define VIEWPORT_RATIO (4.0 / 3.0)
 #define VIEWPORT_ASPECT 50.0
 
+struct {
+    int x;
+    int y;
+} mouse_position;
+
 void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
 
+    glPushMatrix();
     set_view(&camera);
     draw_scene(&scene);
-
     glPopMatrix();
+
+    if (is_preview_visible) {
+        show_texture_preview();
+    }
+
     glutSwapBuffers();
 }
 
@@ -38,31 +47,45 @@ void reshape(GLsizei width, GLsizei height)
     glViewport(x, y, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(50.0, (GLdouble)width / (GLdouble)height, 0.01, 10000.0);
+    gluPerspective(VIEWPORT_ASPECT, VIEWPORT_RATIO, 0.01, 10000.0);
+}
+
+void mouse(int button, int state, int x, int y)
+{
+    mouse_position.x = x;
+    mouse_position.y = y;
 }
 
 void motion(int x, int y)
 {
-    // rotate_camera(&camera, x, y);
+    rotate_camera(&camera, mouse_position.x - x, mouse_position.y - y);
+    mouse_position.x = x;
+    mouse_position.y = y;
     glutPostRedisplay();
 }
 
 void keyboard(unsigned char key, int x, int y)
 {
-    float position;
-
     switch (key) {
     case 'w':
-        set_camera_speed(&camera, 0.1);
+        set_camera_speed(&camera, 1);
         break;
     case 's':
-        set_camera_speed(&camera, -0.1);
+        set_camera_speed(&camera, -1);
         break;
     case 'a':
-        set_camera_side_speed(&camera, 0.1);
+        set_camera_side_speed(&camera, 1);
         break;
     case 'd':
-        set_camera_side_speed(&camera, -0.1);
+        set_camera_side_speed(&camera, -1);
+        break;
+    case 't':
+        if (is_preview_visible) {
+            is_preview_visible = FALSE;
+        }
+        else {
+            is_preview_visible = TRUE;
+        }
         break;
     }
 
@@ -71,8 +94,6 @@ void keyboard(unsigned char key, int x, int y)
 
 void keyboard_up(unsigned char key, int x, int y)
 {
-    float position;
-
     switch (key) {
     case 'w':
     case 's':
@@ -101,4 +122,3 @@ void idle()
 
     glutPostRedisplay();
 }
-
